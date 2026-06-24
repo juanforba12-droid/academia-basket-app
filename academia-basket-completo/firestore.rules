@@ -1,0 +1,163 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── HELPERS ───────────────────────────────────────────
+    function isAuth() {
+      return request.auth != null;
+    }
+    function userDoc() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid));
+    }
+    function userExists() {
+      return isAuth() && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid));
+    }
+    function getUser() {
+      // Sólo llamar tras verificar userExists()
+      return userDoc().data;
+    }
+    function isAdmin() {
+      return userExists() && getUser().rol == "admin";
+    }
+    function isStaff() {
+      return userExists() && getUser().rol in ["admin", "entrenador"];
+    }
+    function isActive() {
+      return userExists() && getUser().activo != false;
+    }
+    function isStaffActive() {
+      return isStaff() && isActive();
+    }
+    function isAdminActive() {
+      return isAdmin() && isActive();
+    }
+    function isAuthActive() {
+      return isAuth() && isActive();
+    }
+
+    // ─── CONFIG ─────────────────────────────────────────────
+    match /config/{doc} {
+      allow read, write: if isAdminActive();
+    }
+
+    // ─── USUARIOS ───────────────────────────────────────────
+    match /usuarios/{uid} {
+      allow read:   if isAuthActive() &&
+                       (request.auth.uid == uid || isAdmin());
+      // Crear perfil propio (registro) — usuario recién creado no tiene doc aún
+      allow create: if isAuth() && request.auth.uid == uid;
+      // Actualizar propio (sin cambiar rol/activo) o admin actualiza cualquiera
+      allow update: if isAdminActive()
+                    || (isAuthActive() && request.auth.uid == uid
+                        && !request.resource.data.diff(resource.data).affectedKeys()
+                            .hasAny(["rol", "activo"]));
+      allow delete: if isAdminActive();
+    }
+
+    // ─── JUGADORES ──────────────────────────────────────────
+    match /jugadores/{jugadorId} {
+      allow read:   if isStaffActive()
+                    || (isAuthActive() && getUser().jugadorId == jugadorId)
+                    || (isAuthActive() && jugadorId in getUser().jugadoresIds);
+      allow create: if isAdminActive();
+      allow update: if isAdminActive();
+      allow delete: if isAdminActive();
+    }
+
+    // ─── SESIONES ───────────────────────────────────────────
+    match /sesiones/{id} {
+      allow read:  if isAuthActive();
+      allow write: if isStaffActive();
+    }
+
+    // ─── PARTIDOS ───────────────────────────────────────────
+    match /partidos/{id} {
+      allow read:  if isAuthActive();
+      allow write: if isStaffActive();
+    }
+
+    // ─── EVALUACIONES ───────────────────────────────────────
+    match /evaluaciones/{id} {
+      allow read:  if isAuthActive();
+      allow write: if isStaffActive();
+    }
+
+    // ─── NOTICIAS ───────────────────────────────────────────
+    // Lectura pública para la página de inicio
+    match /noticias/{id} {
+      allow read:  if true;
+      allow write: if isStaffActive();
+    }
+
+    // ─── FORO ───────────────────────────────────────────────
+    match /foro_hilos/{id} {
+      allow read:   if isAuthActive();
+      allow create: if isStaffActive();
+      // update: staff crea/edita hilos; cualquier auth user puede incrementar numRespuestas
+      allow update: if isStaffActive()
+                    || (isAuthActive()
+                        && request.resource.data.diff(resource.data).affectedKeys()
+                            .hasOnly(["numRespuestas"]));
+      allow delete: if isAdminActive();
+    }
+
+    match /foro_respuestas/{id} {
+      allow read:   if isAuthActive();
+      allow create: if isAuthActive();
+      // No se permiten ediciones de respuestas (intencional)
+      allow delete: if isAdminActive();
+    }
+
+    // ─── NOTIFICACIONES ─────────────────────────────────────
+    // Sólo staff puede crear notificaciones (evita spam entre usuarios)
+    match /notificaciones/{id} {
+      allow read, update: if isAuthActive() &&
+                             resource.data.usuarioId == request.auth.uid;
+      allow create: if isStaffActive();
+      allow delete: if isAdminActive();
+    }
+
+    // ─── GALERÍA ────────────────────────────────────────────
+    match /galeria/{id} {
+      allow read:  if true;
+      allow write: if isStaffActive();
+    }
+
+    // ─── CALENDARIO ─────────────────────────────────────────
+    match /calendario/{id} {
+      allow read:  if isAuthActive();
+      allow write: if isStaffActive();
+    }
+
+    // ─── CONTACTO ───────────────────────────────────────────
+    // Cualquiera puede enviar desde la web pública; sólo admin lee/actualiza
+    match /contacto/{id} {
+      allow create: if true;
+      allow read:   if isAdminActive();
+      allow update: if isAdminActive();
+      allow delete: if isAdminActive();
+    }
+
+    // ─── DOCUMENTACIÓN HISTORIAL ────────────────────────────
+    match /doc_historial/{id} {
+      allow read:   if isAdminActive()
+                    || (isAuthActive() &&
+                        resource.data.jugadorId == getUser().jugadorId);
+      allow create: if isAdminActive();
+    }
+
+    // ─── SEGUIMIENTO ACADÉMICO ──────────────────────────────
+    match /asistencia_academica/{id} {
+      allow read:  if isAuthActive();
+      allow write: if isAdminActive();
+    }
+    match /calificaciones/{id} {
+      allow read:  if isAuthActive();
+      allow write: if isAdminActive();
+    }
+    match /informes_academicos/{id} {
+      allow read:  if isAuthActive();
+      allow write: if isAdminActive();
+    }
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "notificaciones",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "usuarioId",  "order": "ASCENDING" },
+        { "fieldPath": "createdAt",  "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "foro_respuestas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "hiloId",    "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "evaluaciones",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "jugadorId", "order": "ASCENDING" },
+        { "fieldPath": "fecha",     "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "doc_historial",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "jugadorId",  "order": "ASCENDING" },
+        { "fieldPath": "timestamp",  "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "asistencia_academica",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "jugadorId", "order": "ASCENDING" },
+        { "fieldPath": "fecha",     "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "calificaciones",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "jugadorId", "order": "ASCENDING" },
+        { "fieldPath": "fecha",     "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "informes_academicos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "jugadorId", "order": "ASCENDING" },
+        { "fieldPath": "fecha",     "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "contacto",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "leido",     "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
