@@ -1,0 +1,1 @@
+import{r as t}from"./react-vendor-BjYQ5lRn.js";import{a as r,d as s}from"./firebase-firestore-DWGq3wcV.js";import{d as m}from"./index-OIKyB9cO.js";function f(){const[o,e]=t.useState("2026-2027");return t.useEffect(()=>{r(s(m,"config","temporada_activa")).then(a=>{a.exists()&&e(a.data().temporada||"2026-2027")}).catch(()=>{})},[]),o}export{f as u};

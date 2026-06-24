@@ -1,0 +1,1 @@
+function o(e){const a=e.split(".").pop().toLowerCase();return`${e.split(".").slice(0,-1).join(".").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9_-]/g,"_").replace(/_+/g,"_").slice(0,60)}.${a}`}function n(e,a){const t=o(a.name);return`${e}/${Date.now()}_${t}`}export{o as a,n as s};

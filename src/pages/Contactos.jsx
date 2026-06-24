@@ -163,7 +163,6 @@ export default function Contactos() {
                         href={`https://wa.me/${telLimpio(m.telefono)}?text=Hola ${encodeURIComponent(m.nombre)}, gracias por contactar con la Academia Internacional de Básquet de Castellón.`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        rel="noopener noreferrer"
                         style={{
                           background: "#25D366", color: "#fff",
                           borderRadius: "6px", padding: "2px 10px",
